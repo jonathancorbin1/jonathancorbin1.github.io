@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-I am blogging HTB writeups to help me obtain the OSCP. I will not be using metasploit.
+HTB writeups on my journey to the OSCP. I won't be using metasploit.
