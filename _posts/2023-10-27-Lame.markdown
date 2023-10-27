@@ -1,0 +1,7 @@
+---
+layout: post
+title:  "L"
+date:   2023-10-27 01:50:30 -0400
+categories: jekyll update
+---
+This will be my first HTB writeup
