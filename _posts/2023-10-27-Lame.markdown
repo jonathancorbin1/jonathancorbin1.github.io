@@ -7,7 +7,11 @@ categories: jekyll update
 
 
 Lame
-
+<img
+  src="/assets/lame.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 A relatively easy box. It has a VSFTPd server on a vulnerable version but is not exploitable. 
 
 ## Recon
