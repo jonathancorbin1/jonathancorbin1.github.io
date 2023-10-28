@@ -7,7 +7,11 @@ categories: jekyll update
 
 
 Bashed
-
+<img
+  src="/assets/bashed.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 Was an easy box up to the tricky priv esc but finally got the root.
 
 ```
