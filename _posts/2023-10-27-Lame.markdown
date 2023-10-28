@@ -3,6 +3,7 @@ layout: post
 title:  "Lame"
 date:   2023-10-27 01:50:30 -0400
 categories: jekyll update
+thumbnail: /assets/lame.png
 ---
 
 
