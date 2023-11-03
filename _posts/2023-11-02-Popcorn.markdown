@@ -8,7 +8,7 @@ categories: jekyll update
 Popcorn
 
 <img
-  src="/assets/popcorn.png"
+  src="/assets/popcorrn.png"
   alt="featured image"
   class="featured-image-post"
 />
@@ -72,7 +72,11 @@ Progress: 28643 / 220561 (12.99%)[ERROR] Get "http://10.10.10.6/AbleFtp": contex
 ```
 
 ### 10.10.10.6:80
-![[Pasted image 20231102185842.png]]
+<img
+  src="/assets/Pasted image 20231102185842.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 ### 10.10.10.6/test
 ![[Pasted image 20231102214854.png]]
