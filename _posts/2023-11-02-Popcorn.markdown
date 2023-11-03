@@ -117,12 +117,10 @@ After registering an account, I browsed around and found an upload page. I downl
 />
 
 After uploading, there is a button to upload a screenshot.
-/>
 <img
   src="/assets/popcorn/Pasted image 20231102222830.png"
   alt="featured image"
   class="featured-image-post"
-/>
 />
 <img
   src="/assets/popcorn/Pasted image 20231102222908.png"
