@@ -73,7 +73,7 @@ Progress: 28643 / 220561 (12.99%)[ERROR] Get "http://10.10.10.6/AbleFtp": contex
 
 ### 10.10.10.6:80
 <img
-  src="/assets/Pasted image 20231102185842.png"
+  src="/assets/popcorn/Pasted image 20231102185842.png"
   alt="featured image"
   class="featured-image-post"
 />
