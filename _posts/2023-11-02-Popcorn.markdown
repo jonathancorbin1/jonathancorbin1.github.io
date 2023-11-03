@@ -79,37 +79,90 @@ Progress: 28643 / 220561 (12.99%)[ERROR] Get "http://10.10.10.6/AbleFtp": contex
 />
 
 ### 10.10.10.6/test
-![[Pasted image 20231102214854.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102214854.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 ### 10.10.10.6/rename
-![[Pasted image 20231102215443.png]]
-
+<img
+  src="/assets/popcorn/Pasted image 20231102215443.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 ### 10.10.10.6/torrent
-![[Pasted image 20231102215613.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102215613.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
-![[Pasted image 20231102215710.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102215710.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 After registering an account, I browsed around and found an upload page. I downloaded a legit torrent file and uploaded it.
-![[Pasted image 20231102222727.png]]
-![[Pasted image 20231102222630.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102222727.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
+<img
+  src="/assets/popcorn/Pasted image 20231102222630.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 After uploading, there is a button to upload a screenshot.
-![[Pasted image 20231102222830.png]]
-![[Pasted image 20231102222908.png]]
+/>
+<img
+  src="/assets/popcorn/Pasted image 20231102222830.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
+/>
+<img
+  src="/assets/popcorn/Pasted image 20231102222908.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 I chose a random screenshot, this kali  logo and uploaded it.
-![[Pasted image 20231102224231.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102224231.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 I captured the request in Burp and changed the extension to php and the content to a php webshell. At first I had to play around with Repeater to see which filters were in place, but this way submitted without errors.
-![[Pasted image 20231102224207.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102224207.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 
 I refreshed and there is the screenshot.
-![[Pasted image 20231102224533.png]]
+<img
+  src="/assets/popcorn/Pasted image 20231102224533.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
+
 
 After some guessing I found the image at `/torrent/upload`
-![[Pasted image 20231102225457.png]]
-![[Pasted image 20231102225543.png]]
-
+<img
+  src="/assets/popcorn/Pasted image 20231102225457.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
+<img
+  src="/assets/popcorn/Pasted image 20231102225543.png"
+  alt="featured image"
+  class="featured-image-post"
+/>
 I test out execution with a simple`id` command with curl and its successful:
 ```
 ┌──(root💀kali)-[/home/spacemoth/machines/popcorn]
